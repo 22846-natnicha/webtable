@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบเก็บข้อมูลแบบตาราง</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .form-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex: 1;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .delete-btn {
+            background-color: #e74c3c;
+            padding: 5px 10px;
+        }
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>📝 ระบบบันทึกข้อมูลพนักงาน / ลูกค้า</h2>
+
+    <div class="form-container">
+        <input type="text" id="nameInput" placeholder="ชื่อ-นามสกุล" required>
+        <input type="text" id="jobInput" placeholder="ตำแหน่ง / อาชีพ" required>
+        <input type="email" id="emailInput" placeholder="อีเมล" required>
+        <button onclick="addData()">+ เพิ่มข้อมูล</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ลำดับ</th>
+                <th>ชื่อ-นามสกุล</th>
+                <th>ตำแหน่ง</th>
+                <th>อีเมล</th>
+                <th>จัดการ</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+    </table>
+
+    <script>
+        // โหลดข้อมูลจาก LocalStorage เมื่อเปิดหน้าเว็บ
+        document.addEventListener("DOMContentLoaded", loadData);
+
+        function addData() {
+            // ดึงค่าจากช่อง Input
+            const name = document.getElementById("nameInput").value;
+            const job = document.getElementById("jobInput").value;
+            const email = document.getElementById("emailInput").value;
+
+            // ตรวจสอบว่ากรอกข้อมูลครบไหม
+            if (name === "" || job === "" || email === "") {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วน!");
+                return;
+            }
+
+            // ดึงข้อมูลเดิมจาก LocalStorage (ถ้ามี)
+            let dataList = JSON.parse(localStorage.getItem("myTableData")) || [];
+
+            // เพิ่มข้อมูลใหม่เข้าไป
+            dataList.push({ name, job, email });
+
+            // บันทึกกลับลงไปใน LocalStorage
+            localStorage.setItem("myTableData", JSON.stringify(dataList));
+
+            // เคลียร์ช่อง Input
+            document.getElementById("nameInput").value = "";
+            document.getElementById("jobInput").value = "";
+            document.getElementById("emailInput").value = "";
+
+            // รีเฟรชตาราง
+            loadData();
+        }
+
+        function loadData() {
+            const tableBody = document.getElementById("tableBody");
+            tableBody.innerHTML = ""; // ล้างข้อมูลเก่าก่อน
+
+            let dataList = JSON.parse(localStorage.getItem("myTableData")) || [];
+
+            // สร้างแถว (Row) สำหรับแต่ละข้อมูล
+            dataList.forEach((data, index) => {
+                let row = `<tr>
+                    <td>${index + 1}</td>
+                    <td>${data.name}</td>
+                    <td>${data.job}</td>
+                    <td>${data.email}</td>
+                    <td><button class="delete-btn" onclick="deleteData(${index})">ลบ</button></td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        function deleteData(index) {
+            let dataList = JSON.parse(localStorage.getItem("myTableData")) || [];
+            
+            // ลบข้อมูลที่ตำแหน่ง index ออก 1 ตัว
+            dataList.splice(index, 1);
+            
+            // บันทึกข้อมูลที่เหลือกลับไป
+            localStorage.setItem("myTableData", JSON.stringify(dataList));
+            
+            // รีเฟรชตาราง
+            loadData();
+        }
+    </script>
+
+</body>
+</html>
